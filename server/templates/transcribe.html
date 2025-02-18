@@ -1,0 +1,49 @@
+{% extends "base.html" %} {% block content %}
+<div class="file-upload">
+  <h2>File Upload and Transcription</h2>
+  <form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }} {{ form.files() }}
+    <div class="w-fit">{{ form.submit() }}</div>
+  </form>
+</div>
+
+{% if transcriptions %}
+<div class="transcription-results">
+  <h3>Transcription Results</h3>
+  {% for transcription in transcriptions %}
+  <article class="mb-4" x-data="{ isOpen: false }">
+    <header class="cursor-pointer" @click="isOpen = !isOpen">
+      <div class="flex justify-between items-center">
+        <h4>{{ transcription.filename }}</h4>
+        <button
+          class="outline contrast size-12 grid place-items-center p-0"
+          @click.stop="isOpen = !isOpen"
+        >
+          <span x-show="!isOpen">▼</span>
+          <span x-show="isOpen">▲</span>
+        </button>
+      </div>
+    </header>
+
+    <div x-show="isOpen" x-collapse>
+      <table>
+        <thead>
+          <tr>
+            <th class="w-fit">Timestamp</th>
+            <th>Transcription</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for segment in transcription.segments %}
+          <tr>
+            <td class="w-48 font-mono text-sm">{{ segment.timestamp }}</td>
+            <td>{{ segment.text }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% endif %} {% endblock %}

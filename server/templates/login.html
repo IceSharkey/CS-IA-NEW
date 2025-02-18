@@ -1,0 +1,56 @@
+{% extends "base.html" %} {% block title %}Login{% endblock %} {% block content
+%}
+<div x-data="loginApp()" x-init="initializeGoogleSignIn">
+  <h2>Sign in with Google</h2>
+  <div class="max-w-fit">
+    <div
+      id="g_id_onload"
+      data-client_id="888946891767-ddsprhbd0kgmt0l95bbfhheir6b1r33h.apps.googleusercontent.com"
+      data-context="signin"
+      data-ux_mode="popup"
+      data-callback="handleCredentialResponse"
+      data-auto_prompt="false"
+    ></div>
+    <div
+      class="g_id_signin"
+      data-type="standard"
+      data-shape="rectangular"
+      data-theme="outline"
+      data-text="signin_with"
+      data-size="large"
+      data-logo_alignment="left"
+    ></div>
+  </div>
+</div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+  function loginApp() {
+    return {
+      initializeGoogleSignIn() {
+        window.handleCredentialResponse = (response) => {
+          fetch("/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ credential: response.credential }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                window.location.href = "/home";
+              } else {
+                alert("Login failed: " + data.message);
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("An error occurred during login");
+            });
+        };
+      },
+    };
+  }
+</script>
+{% endblock %}

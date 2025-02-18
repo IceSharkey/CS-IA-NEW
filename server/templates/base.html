@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    />
+    <script>
+      window.__unocss = {
+        presets: [presetUno()],
+        theme: {
+          colors: {
+            bg: "var(--pico-primary-inverse)",
+            fg: "var(--pico-contrast)",
+            sec: "var(--pico-secondary)",
+            accent: "var(--pico-primary)",
+            muted: "var(--pico-muted-border-color)",
+          },
+        },
+        rules: [
+          [
+            /^text-(.*)$/,
+            ([, c]) => {
+              if (window.__unocss.theme.colors[c])
+                return { color: window.__unocss.theme.colors[c] };
+            },
+          ],
+        ],
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+    <title>{% block title %}Home{% endblock %}</title>
+  </head>
+  <body>
+    <nav class="px-4 items-center bg-muted">
+      <ul>
+        <li><strong>CS IA</strong></li>
+      </ul>
+      <ul>
+        <li><a href="/home">Home</a></li>
+        <li><a href="/home/report">Report</a></li>
+        <li><a href="/home/transcribe">Upload and Transcribe</a></li>
+        <li><a href="/home/records">Records</a></li>
+        <li><a href="/home/manage">Manage</a></li>
+        <li x-data="{ open: false }" class="relative">
+          {% if current_user.is_authenticated %}
+          <a @click="open = !open" href="#" role="button" class="m-0">
+            Logged in as {{ current_user.name }}
+            <span x-show="!open">▼</span>
+            <span x-show="open">▲</span>
+          </a>
+          <ul
+            x-show="open"
+            @click.away="open = false"
+            class="absolute bg-muted rounded-md top-[90%] left-4 w-32 p-2 px-4 shadow-md ring"
+          >
+            <li class="p-0"><a href="/logout">Logout</a></li>
+          </ul>
+          {% else %}
+          <a href="/login">Login</a>
+          {% endif %}
+        </li>
+      </ul>
+    </nav>
+
+    <main class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <article
+        class="{% if category == 'error' %}alert-error{% else %}alert-success{% endif %}"
+      >
+        {{ message }}
+      </article>
+      {% endfor %} {% endif %} {% endwith %} {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

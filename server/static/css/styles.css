@@ -1,0 +1,33 @@
+.alert-success {
+  border: 2px solid var(--pico-ins-color);
+}
+
+[x-cloak] {
+  display: none !important;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Collapse animation styles */
+[x-collapse] {
+  transition: height 0.3s ease-in-out;
+}
+
+[x-collapse].collapsing {
+  overflow: hidden;
+}
+
+mark {
+  background-color: #f4aa4a99;
+  color: var(--pico-primary-inverse);
+  padding: 0.1em 0.2em;
+  border-radius: 0.2em;
+}
+
+.summary {
+  background-color: var(--pico-secondary-background);
+  padding: 1rem;
+  border-radius: var(--pico-border-radius);
+}

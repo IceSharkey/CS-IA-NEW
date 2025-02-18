@@ -1,0 +1,90 @@
+{% extends "base.html" %} {% block content %}
+<h1>Keyword Search Report</h1>
+
+<div class="keyword-search">
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="grid">
+      <div>{{ form.keyword.label }} {{ form.keyword() }}</div>
+      <div class="w-fit">{{ form.submit() }}</div>
+    </div>
+  </form>
+</div>
+
+{% if results %}
+<div
+  class="search-results"
+  x-data="{
+    totalOccurrences: {{ total_occurrences }},
+    totalFiles: {{ total_files }},
+    count: {{ count }},
+    percentage: {{ percentage }},
+    openStates: Array({{ results|length }}).fill(false)
+}"
+>
+  <h2>Search Results</h2>
+
+  <!-- Statistics Summary -->
+  <article class="summary mb-4">
+    <header>
+      <h3>Overview</h3>
+    </header>
+    <div class="grid">
+      <div>
+        <strong>Total Occurrences:</strong>
+        <span x-text="totalOccurrences"></span>
+      </div>
+      <div>
+        <strong>Files with Keyword:</strong>
+        <span x-text="count"></span> / <span x-text="totalFiles"></span>
+      </div>
+      <div>
+        <strong>Percentage of Files:</strong>
+        <span x-text="percentage.toFixed(1)"></span>%
+      </div>
+    </div>
+  </article>
+
+  <!-- Individual Results -->
+  {% for result in results %}
+  <article class="mb-4" x-data="{ isOpen: false }">
+    <header class="cursor-pointer" @click="isOpen = !isOpen">
+      <div class="flex justify-between items-center">
+        <div>
+          <h3 class="d-inline">{{ result.filename }}</h3>
+          <span class="ml-4">Occurrences: {{ result.count }}</span>
+        </div>
+        <button
+          class="outline contrast size-12 grid place-items-center p-0"
+          @click.stop="isOpen = !isOpen"
+        >
+          <span x-show="!isOpen">▼</span>
+          <span x-show="isOpen">▲</span>
+        </button>
+      </div>
+    </header>
+
+    <div x-show="isOpen" x-collapse>
+      <table>
+        <thead>
+          <tr>
+            <th class="w-fit">Timestamp</th>
+            <th>Text</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for segment in result.segments %}
+          <tr>
+            <td class="w-48 font-mono text-sm">{{ segment.timestamp }}</td>
+            <td>{{ segment.text | highlight_keyword(keyword) | safe }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% elif form.is_submitted() %}
+<p>No results found for the given keyword.</p>
+{% endif %} {% endblock %}

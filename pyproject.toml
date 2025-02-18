@@ -1,0 +1,22 @@
+[project]
+name = "csia"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.0.3",
+    "flask-sqlalchemy>=3.1.1",
+    "flask-wtf>=1.2.1",
+    "google-auth-oauthlib>=1.2.1",
+    "google-oauth>=1.0.1",
+    "pathlib>=1.0.1",
+    "pip>=24.2",
+    "requests>=2.32.3",
+    "soundfile>=0.12.1",
+    "werkzeug>=3.0.4",
+    "wtforms>=3.1.2",
+    "speechrecognition>=3.10.4",
+    "flask-login>=0.6.3",
+    "python-dotenv>=1.0.1",
+]

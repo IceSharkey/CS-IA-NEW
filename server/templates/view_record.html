@@ -1,0 +1,36 @@
+{% extends "base.html" %} {% block content %}
+<div class="record-view">
+  <header class="mb-4">
+    <nav class="flex justify-between items-center">
+      <h1>{{ transcription.filename }}</h1>
+      <a href="{{ url_for('main.records') }}" role="button" class="outline"
+        >Back to Records</a
+      >
+    </nav>
+    <p>
+      Uploaded: {{ transcription.upload_date.strftime('%Y-%m-%d %H:%M:%S') }}
+    </p>
+  </header>
+
+  <div class="transcription-content">
+    <table>
+      <thead>
+        <tr>
+          <th class="w-fit">Timestamp</th>
+          <th>Text</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for segment in segments %}
+        <tr>
+          <td class="w-48 font-mono text-sm">
+            {{ segment.start_time }} - {{ segment.end_time }}
+          </td>
+          <td>{{ segment.text }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

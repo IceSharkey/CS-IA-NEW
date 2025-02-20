@@ -1,0 +1,51 @@
+{% extends "base.html" %} {% block title %}Login{% endblock %} {% block content%} 
+<table border="1" cellpadding="5" cellspacing="0" style="width: 1000px;" >
+    <h2>Waitlist</h2>
+    <thead>
+      <tr>
+        <th style="width: 70%;">Email</th>
+        <th style="width: 30%;">Confirm</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in waitlist_users %}
+        <tr>
+          <td>{{ user.email }}</td>
+          <td>
+            <button class="confirm-button" user_id="{{ user.id }}">Confirm</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    const confirmButtons = document.querySelectorAll('.confirm-button');
+  
+    confirmButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const userId = button.getAttribute('user_id');
+        if (confirm(`Are you sure you want to update the role for this user?`)) {
+          // Send a POST request to update the role
+          fetch('/home/manage/update-role', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `user_id=${userId}&role_id=3`
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.message === "Role updated successfully") {
+                alert("Role has been updated successfully");
+            } else {
+                alert("Role update failed");
+            }
+          })
+          .catch(error => console.error(error));
+        }
+      });
+    });
+  </script>
+{% endblock %}

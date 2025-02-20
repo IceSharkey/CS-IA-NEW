@@ -42,16 +42,22 @@
     <title>{% block title %}Home{% endblock %}</title>
   </head>
   <body>
+    {% block sidebar %}
+      <nav class="sidebar">
+        <ul>
+          <li><a href="/home">Home</a></li>
+          <li><a href="/home/report">Report</a></li>
+          <li><a href="/home/transcribe">Upload and Transcribe</a></li>
+          <li><a href="/home/records">Records</a></li>
+          <li><a href="/home/manage">Manage</a></li>
+        </ul>
+      </nav>
+    {% endblock %}
     <nav class="px-4 items-center bg-muted">
       <ul>
         <li><strong>CS IA</strong></li>
       </ul>
       <ul>
-        <li><a href="/home">Home</a></li>
-        <li><a href="/home/report">Report</a></li>
-        <li><a href="/home/transcribe">Upload and Transcribe</a></li>
-        <li><a href="/home/records">Records</a></li>
-        <li><a href="/home/manage">Manage</a></li>
         <li x-data="{ open: false }" class="relative">
           {% if current_user.is_authenticated %}
           <a @click="open = !open" href="#" role="button" class="m-0">

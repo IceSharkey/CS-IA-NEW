@@ -10,23 +10,25 @@ class User(UserMixin, db.Model):
     transcriptions = db.relationship(
         "Transcription", backref="user", lazy=True, cascade="all, delete-orphan"
     )
-    roles = db.relationship(
-        "Role", secondary="user_roles", backref=db.backref("users", lazy=True)
-    )
+    roles = db.relationship("Role", secondary="user_roles", backref="users")
+    def has_role(self, role_name):
+        return self.roles.filter_by(name=role_name).first() is not None
 
 
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
-
+    
     def __repr__(self):
         return f"Role('{self.name}')"
-    
-user_roles = db.Table(
-    "user_roles",
-    db.Column("user_id", db.String(120), db.ForeignKey("user.id")),
-    db.Column("role_id", db.Integer, db.ForeignKey("role.id")),
-)
+
+class UserRoles(db.Model):
+    __table_args__ = (db.PrimaryKeyConstraint('user_id', 'role_id'),)
+    user_id = db.Column(db.String(120), db.ForeignKey("user.id"), nullable=False)
+    role_id = db.Column(db.Integer, db.ForeignKey("role.id"), nullable=False)
+
+    def __repr__(self):
+        return f"UserRoles('{self.user_id}', '{self.role_id}')"
 
 
 

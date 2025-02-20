@@ -3,7 +3,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_auth_requests
 import os
-from .models import db, User
+from .models import db, User, Role, UserRoles
 
 auth = Blueprint("auth", __name__)
 
@@ -34,6 +34,21 @@ def login():
                 )
                 db.session.add(user)
                 db.session.commit()
+            
+            
+            if user.email == "s1401005@elearn.logosacademy.edu.hk":
+                if not user.roles:
+                    role = Role.query.filter_by(name="Administrator").first()
+                    user_role = UserRoles(user_id=user.id, role_id=role.id)
+                    db.session.add(user_role)
+                    db.session.commit()
+
+            if not user.roles:
+                role = Role.query.filter_by(name="Waitlist").first()
+                user_role = UserRoles(user_id=user.id, role_id=role.id)
+                db.session.add(user_role)
+                db.session.commit()
+
 
             login_user(user)
             return jsonify({"success": True})

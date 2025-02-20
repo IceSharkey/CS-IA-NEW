@@ -1,11 +1,12 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from .forms import KeywordSearchForm
+from functools import wraps
 from .models import Transcription, TranscriptionSegment
 from sqlalchemy import func
 import re
 import os
-from .models import db
+from .models import db, UserRoles, Role, User
 
 main = Blueprint("main", __name__)
 
@@ -22,18 +23,43 @@ def highlight_keyword(text, keyword):
 @main.route("/")
 def index():
     if current_user.is_authenticated:
-        return redirect(url_for("main.home"))
+            return redirect(url_for("main.home"))
     return render_template("login.html")
 
+def roles_accepted(*role_names):
+    def decorator(func):
+        @wraps(func)
+        def decorated_function(*args, **kwargs):
+            for role_name in role_names:
+                role = Role.query.filter_by(name=role_name).first()
+                if role and UserRoles.query.filter_by(user_id=current_user.id, role_id=role.id).first():
+                    return func(*args, **kwargs)
+            return redirect(url_for("main.waitlist"))
+        return decorated_function
+    return decorator
+
+def roles_required(*role_names):
+    def decorator(func):
+        @wraps(func)
+        def decorated_function(*args, **kwargs):
+            for role_name in role_names:
+                role = Role.query.filter_by(name=role_name).first()
+                if role and UserRoles.query.filter_by(user_id=current_user.id, role_id=role.id).first():
+                    return func(*args, **kwargs)
+            return redirect(url_for("main.home"))
+        return decorated_function
+    return decorator
 
 @main.route("/home")
 @login_required
+@roles_accepted('Administrator', 'Moderator', 'User')
 def home():
     return render_template("base.html")
 
 
 @main.route("/home/report", methods=["GET", "POST"])
 @login_required
+@roles_accepted('Administrator', 'Moderator', 'User')
 def report():
     form = KeywordSearchForm()
     results = None
@@ -95,14 +121,30 @@ def report():
     )
 
 
-@main.route("/home/manage")
+@main.route("/home/manage", methods=["GET", "POST"])
 @login_required
+@roles_required('Administrator', 'Moderator')
 def manage():
-    return render_template("base.html")
+    waitlist_users = User.query.join(UserRoles).join(Role).filter(Role.id == 4).all()
+    return render_template("manage.html", waitlist_users=waitlist_users)
+
+@main.route("/home/manage/update-role", methods=["POST"])
+@login_required
+@roles_accepted('Administrator', 'Moderator')
+def update_role():
+    user_id = request.form.get("user_id")
+    user_role = UserRoles.query.filter_by(user_id=user_id).first()
+    if user_role:
+        user_role.role_id = 3
+        db.session.commit()
+        return jsonify({"message": "Role updated successfully"})
+    else:
+        return jsonify({"message": "User not found"}), 404
 
 
 @main.route("/home/records")
 @login_required
+@roles_accepted('Administrator', 'Moderator', 'User')
 def records():
     transcriptions = (
         Transcription.query.filter_by(user_id=current_user.id)
@@ -114,6 +156,7 @@ def records():
 
 @main.route("/home/records/delete/<int:id>")
 @login_required
+@roles_accepted('Administrator', 'Moderator', 'User')
 def delete_record(id):
     transcription = Transcription.query.get_or_404(id)
     if transcription.user_id != current_user.id:
@@ -141,6 +184,7 @@ def delete_record(id):
 
 @main.route("/home/records/view/<int:id>")
 @login_required
+@roles_accepted('Administrator', 'Moderator', 'User')
 def view_record(id):
     transcription = Transcription.query.get_or_404(id)
     if transcription.user_id != current_user.id:
@@ -151,3 +195,7 @@ def view_record(id):
     return render_template(
         "view_record.html", transcription=transcription, segments=segments
     )
+
+@main.route("/waitlist")
+def waitlist():
+    return render_template("waitlist.html")

@@ -126,7 +126,10 @@ def report():
 @roles_required('Administrator', 'Moderator')
 def manage():
     waitlist_users = User.query.join(UserRoles).join(Role).filter(Role.id == 4).all()
-    return render_template("manage.html", waitlist_users=waitlist_users)
+    all_users = User.query.join(UserRoles).join(Role).filter(Role.id == 3).all()
+    moderators = User.query.join(UserRoles).join(Role).filter(Role.id == 2).all()
+    current_user_role = UserRoles.query.filter_by(user_id=current_user.id).first().role_id
+    return render_template("manage.html", waitlist_users=waitlist_users, all_users=all_users, moderators=moderators, current_user_role=current_user_role)
 
 @main.route("/home/manage/update-role", methods=["POST"])
 @login_required
@@ -138,6 +141,32 @@ def update_role():
         user_role.role_id = 3
         db.session.commit()
         return jsonify({"message": "Role updated successfully"})
+    else:
+        return jsonify({"message": "User not found"}), 404
+    
+@main.route("/home/manage/promote-moderator", methods=["POST"])
+@login_required
+@roles_accepted('Administrator')
+def promote_role():
+    user_id = request.form.get("user_id")
+    user_role = UserRoles.query.filter_by(user_id=user_id).first()
+    if user_role:
+        user_role.role_id = 2
+        db.session.commit()
+        return jsonify({"message": "Role updated successfully"})
+    else:
+        return jsonify({"message": "User not found"}), 404
+    
+@main.route("/home/manage/delete-role", methods=["POST"])
+@login_required
+@roles_accepted('Administrator', 'Moderator')
+def delete_user_role():
+    user_id = request.form.get("user_id")
+    user = User.query.get(user_id)
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": "User deleted successfully"})
     else:
         return jsonify({"message": "User not found"}), 404
 

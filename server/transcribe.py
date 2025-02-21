@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, flash, request, current_app
+from flask import Blueprint, render_template, flash, request, current_app, get_flashed_messages
 from flask_login import login_required, current_user
 import os
 from werkzeug.utils import secure_filename
@@ -21,7 +21,7 @@ def format_time(seconds):
 
 
 def transcribe_with_whisper(audio_file_path):
-    whisper_url = "http://192.168.2.114:9000/asr?encode=true&task=transcribe&word_timestamps=true&output=json"
+    whisper_url = "http://localhost:9000/asr?encode=true&task=transcribe&output=json"
 
     with open(audio_file_path, "rb") as audio_file:
         files = {"audio_file": audio_file}

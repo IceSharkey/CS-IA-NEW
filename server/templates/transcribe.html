@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block content %}
 <div class="file-upload">
-  <h1>File Upload and Transcription</h1>
+  <h2>File Upload and Transcription</h2>
   <form method="POST" enctype="multipart/form-data">
     {{ form.hidden_tag() }} {{ form.files() }}
     <div class="w-fit">{{ form.submit() }}</div>
@@ -8,7 +8,7 @@
 </div>
 
 {% if transcriptions %}
-<div class="transcription-results">
+<div class="transcription-results mr-50">
   <h3>Transcription Results</h3>
   {% for transcription in transcriptions %}
   <article class="mb-4" x-data="{ isOpen: false }">

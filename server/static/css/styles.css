@@ -34,12 +34,15 @@
 }
 
 
-nav.px-4.items-center.bg-muted {
+nav.px-4.items-center {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
+  background-color: #1b1d24;
 }
+
+
 
 div[x-data="loginApp()"] {
   position: absolute;
@@ -54,7 +57,13 @@ body {
   overflow-x: hidden;
 }
 
+.flash-message {
+  margin-right: 200px; 
+}
 
+.transcription-results {
+  overflow-x: hidden;
+}
 
 .alert-success {
   border: 2px solid var(--pico-ins-color);

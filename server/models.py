@@ -27,6 +27,7 @@ class UserRoles(db.Model):
     user_id = db.Column(db.String(120), db.ForeignKey("user.id"), nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"), nullable=False)
 
+    user = db.relationship("User", backref=db.backref("user_roles", cascade="delete"))
     def __repr__(self):
         return f"UserRoles('{self.user_id}', '{self.role_id}')"
 

@@ -3,8 +3,9 @@
     <h2>Waitlist</h2>
     <thead>
       <tr>
-        <th style="width: 70%;">Email</th>
-        <th style="width: 30%;">Confirm</th>
+        <th style="width: 60%;">Email</th>
+        <th style="width: 20%;">Confirm</th>
+        <th style="width: 20%;">Deny</th>
       </tr>
     </thead>
     <tbody>
@@ -13,34 +14,116 @@
           <td>{{ user.email }}</td>
           <td>
             <button class="confirm-button" user_id="{{ user.id }}">Confirm</button>
-            </form>
+          </td>
+          <td>
+            <button class="deny-button" user_id="{{ user.id }}">Deny</button>
           </td>
         </tr>
       {% endfor %}
     </tbody>
   </table>
+  <h2>Users</h2>
+    <table border="1" cellpadding="5" cellspacing="0" style="width: 1000px;">
+      <thead>
+        <tr>
+          <th style="width: 80%;">Email</th>
+          <th style="width: 20%;">Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in all_users %}
+          <tr>
+            <td>{{ user.email }}</td>
+            <td>
+              <button class="deny-button" user_id="{{ user.id }}">Delete</button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if current_user_role == 1 %}
+      <h2>Moderators</h2>
+      <table border="1" cellpadding="5" cellspacing="0" style="width: 1000px;">
+        <thead>
+          <tr>
+            <th style="width: 80%;">Email</th>
+            <th style="width: 20%;">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in moderators %}
+            <tr>
+              <td>{{ user.email }}</td>
+              <td>
+                <button class="deny-button" user_id="{{ user.id }}">Delete</button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <h2>Promote to Moderator</h2>
+      <table border="1" cellpadding="5" cellspacing="0" style="width: 1000px;">
+        <thead>
+          <tr>
+            <th style="width: 80%;">Email</th>
+            <th style="width: 20%;">Promote</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in all_users %}
+            <tr>
+              <td>{{ user.email }}</td>
+              <td>
+                <button class="promote-button" user_id="{{ user.id }}">Promote</button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  
 
   <script>
-    const confirmButtons = document.querySelectorAll('.confirm-button');
+    const confirmButtons = document.querySelectorAll('.confirm-button, .deny-button, .promote-button');
   
     confirmButtons.forEach(button => {
       button.addEventListener('click', () => {
         const userId = button.getAttribute('user_id');
-        if (confirm(`Are you sure you want to update the role for this user?`)) {
-          // Send a POST request to update the role
-          fetch('/home/manage/update-role', {
+        let action;
+        let roleId;
+        if (button.classList.contains('confirm-button')) {
+          action = 'update';
+          roleId = 3;
+        } else if (button.classList.contains('deny-button')) {
+          action = 'delete';
+          roleId = 0;
+        } else if (button.classList.contains('promote-button')) {
+          action = 'promote';
+          roleId = 2;
+        }
+        let confirmMessage;
+        if (action === 'update') {
+          confirmMessage = `Are you sure you want to update the role for this user?`;
+        } else if (action === 'delete') {
+          confirmMessage = `Are you sure you want to delete this user?`;
+        } else if (action === 'promote') {
+          confirmMessage = `Are you sure you want to promote this user?`;
+        }
+        if (confirm(confirmMessage)) {
+          const url = action === 'update' ? '/home/manage/update-role' : action === 'delete' ? '/home/manage/delete-role' : '/home/manage/promote-moderator';
+          fetch(url, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: `user_id=${userId}&role_id=3`
+            body: `user_id=${userId}&role_id=${roleId}`
           })
           .then(response => response.json())
           .then(data => {
-            if (data.message === "Role updated successfully") {
-                alert("Role has been updated successfully");
+            if (data.message === "Role updated successfully" || data.message === "User deleted successfully" || data.message === "User promoted successfully") {
+              alert(`${action === 'update' ? 'Role updated' : action === 'delete' ? 'User deleted' : 'User promoted'} successfully`);
             } else {
-                alert("Role update failed");
+              alert(`${action === 'update' ? 'Role update' : action === 'delete' ? 'User deletion' : 'User promotion'} failed`);
             }
           })
           .catch(error => console.error(error));
@@ -48,4 +131,5 @@
       });
     });
   </script>
+  
 {% endblock %}
